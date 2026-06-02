@@ -7,12 +7,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @RequiredArgsConstructor
 public class AdminInitializer {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Bean
     public CommandLineRunner createAdmin() {
@@ -22,8 +24,9 @@ public class AdminInitializer {
 
                 User admin = User.builder()
                         .email("admin@gmail.com")
-                        .password("admin123")
+                        .password(passwordEncoder.encode("admin123"))
                         .role(Role.ADMIN)
+                        .isActive(true)
                         .build();
 
                 userRepository.save(admin);

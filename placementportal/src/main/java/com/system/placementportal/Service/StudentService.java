@@ -1,12 +1,16 @@
 package com.system.placementportal.Service;
 
+import com.system.placementportal.Dto.ChangePasswordRequestDto;
 import com.system.placementportal.Dto.StudentUpdateRequestDto;
 import com.system.placementportal.Entity.Role;
 import com.system.placementportal.Entity.Student;
 import com.system.placementportal.Entity.User;
+import com.system.placementportal.Exception.ResourceNotFoundException;
 import com.system.placementportal.Repository.StudentRepository;
 import com.system.placementportal.Repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +19,7 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 🔹 GET PROFILE
     public Student getMyProfileByEmail(String email) {
@@ -71,5 +76,29 @@ public class StudentService {
         }
 
         return studentRepository.save(student);
+    }
+
+    public String changePassword(
+            String email,
+            @Valid ChangePasswordRequestDto request
+    ) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(
+                request.getOldPassword(),
+                user.getPassword())) {
+
+            throw new RuntimeException("Old password is incorrect");
+        }
+
+        user.setPassword(
+                passwordEncoder.encode(request.getNewPassword()));
+
+        userRepository.save(user);
+
+        return "Password changed successfully";
     }
 }

@@ -71,4 +71,34 @@ public class JobService {
         jobRepository.deleteById(id);
         log.info("Job deleted successfully with ID: {}", id);
     }
+
+    // 🔹 Update Job
+    public Job updateJob(String email, Long id, JobRequestDto dto) {
+
+        log.info("Admin {} updating job ID: {}", email, id);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (user.getRole() != Role.ADMIN) {
+            log.warn("Job update failed: User {} is not ADMIN", email);
+            throw new RuntimeException("Access denied");
+        }
+
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Job not found with ID: " + id));
+
+        job.setTitle(dto.getTitle());
+        job.setDescription(dto.getDescription());
+        job.setPackageLpa(dto.getPackageLpa());
+        job.setMinCgpa(dto.getMinCgpa());
+        job.setSkillsRequired(dto.getSkillsRequired());
+
+        Job updatedJob = jobRepository.save(job);
+
+        log.info("Job updated successfully with ID: {}", updatedJob.getId());
+
+        return updatedJob;
+    }
 }

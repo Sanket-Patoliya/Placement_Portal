@@ -69,6 +69,23 @@ public class ApplicationService {
         return applicationRepository.findByStudentUserId(user.getId());
     }
 
+    public List<Application> getApplicationsByJob(String email, Long jobId) {
+
+        log.info("Fetching applications for job ID: {}", jobId);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (user.getRole() != Role.ADMIN) {
+            throw new RuntimeException("Access denied");
+        }
+
+        if (!jobRepository.existsById(jobId)) {
+            throw new ResourceNotFoundException("Job not found");
+        }
+
+        return applicationRepository.findByJobId(jobId);
+    }
     // 🔹 UPDATE STATUS (ADMIN ONLY)
     public Application updateStatus(String email, Long applicationId, Status status) {
         log.info("Admin {} updating application ID {} to status {}", email, applicationId, status);
@@ -86,5 +103,19 @@ public class ApplicationService {
         application.setStatus(status);
 
         return applicationRepository.save(application);
+    }
+
+    public List<Application> getAllApplications(String email) {
+
+        log.info("Fetching all applications");
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (user.getRole() != Role.ADMIN) {
+            throw new RuntimeException("Access denied");
+        }
+
+        return applicationRepository.findAll();
     }
 }

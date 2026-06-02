@@ -10,4 +10,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     List<Application> findByStudentUserId(Long userId);
 
     boolean existsByStudentIdAndJobId(Long studentId, Long jobId);
+
+    List<Application> findByJobId(Long jobId);
 }
