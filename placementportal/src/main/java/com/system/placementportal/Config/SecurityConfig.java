@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/jobs/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/jobs/**").authenticated() // Everyone can view
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/dashboard/**").hasRole("ADMIN")
                         .requestMatchers("/student/**").hasRole("STUDENT")
                         .anyRequest().authenticated()
                 )
