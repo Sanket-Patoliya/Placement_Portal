@@ -5,14 +5,17 @@ import com.system.placementportal.Dto.StudentUpdateRequestDto;
 import com.system.placementportal.Entity.Student;
 import com.system.placementportal.Service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Tag(
@@ -84,5 +87,20 @@ public class StudentController {
                 .getName();
 
         return studentService.changePassword(email, request);
+    }
+
+    @PostMapping(
+            value = "/resume",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public String uploadResume(
+            @Parameter(description = "Resume PDF file")
+            @RequestParam("file") MultipartFile file
+    ) {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return studentService.uploadResume(email, file);
     }
 }

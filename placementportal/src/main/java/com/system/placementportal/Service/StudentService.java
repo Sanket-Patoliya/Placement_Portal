@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ResumeService resumeService;
 
     // 🔹 GET PROFILE
     public Student getMyProfileByEmail(String email) {
@@ -101,4 +103,45 @@ public class StudentService {
 
         return "Password changed successfully";
     }
-}
+
+    public String uploadResume(
+            String email,
+            MultipartFile file
+    ) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
+
+        if (user.getRole() != Role.STUDENT) {
+            throw new RuntimeException("Only students can upload resume");
+        }
+
+        Student student = studentRepository.findByUserId(user.getId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Student not found"));
+
+        // 🔹 File Empty Check
+        if (file.isEmpty()) {
+            throw new RuntimeException("Please upload a file");
+        }
+
+        // 🔹 PDF Validation
+        if (!"application/pdf".equals(file.getContentType())) {
+            throw new RuntimeException("Only PDF files are allowed");
+        }
+
+        // 🔹 Size Validation (5 MB)
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new RuntimeException("File size must be less than 5 MB");
+        }
+
+        String resumeUrl = resumeService.uploadResume(file);
+
+        student.setResumeUrl(resumeUrl);
+        student.setResumeFileName(file.getOriginalFilename());
+
+        studentRepository.save(student);
+
+        return resumeUrl;
+    }}

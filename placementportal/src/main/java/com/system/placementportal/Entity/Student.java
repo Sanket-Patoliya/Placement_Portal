@@ -22,6 +22,7 @@ public class Student {
     private String branch;
     private String skills;
     private String resumeUrl;
+    private String resumeFileName;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
