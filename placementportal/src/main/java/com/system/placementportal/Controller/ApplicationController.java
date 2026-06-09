@@ -1,8 +1,11 @@
 package com.system.placementportal.Controller;
 
+import com.system.placementportal.Dto.ApplicationResponseDto;
 import com.system.placementportal.Entity.Application;
 import com.system.placementportal.Entity.Status;
 import com.system.placementportal.Service.ApplicationService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -38,13 +41,13 @@ public class ApplicationController {
             @ApiResponse(responseCode = "404", description = "Job not found")
     })
     @PostMapping("/apply/{jobId}")
-    public String apply(@PathVariable Long jobId) {
+    public ResponseEntity<String> apply(@PathVariable Long jobId) {
 
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
 
-        return applicationService.applyWithEmail(email, jobId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(applicationService.applyWithEmail(email, jobId));
     }
 
 
@@ -59,13 +62,13 @@ public class ApplicationController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @GetMapping("/me")
-    public List<Application> getMyApplications() {
+    public ResponseEntity<List<ApplicationResponseDto>> getMyApplications() {
 
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
 
-        return applicationService.getMyApplicationsByEmail(email);
+        return ResponseEntity.ok(applicationService.getMyApplicationsByEmail(email));
     }
 
 
@@ -82,7 +85,7 @@ public class ApplicationController {
             @ApiResponse(responseCode = "404", description = "Application not found")
     })
     @PatchMapping("/{id}/status")
-    public Application updateStatus(
+    public ResponseEntity<ApplicationResponseDto> updateStatus(
             @PathVariable Long id,
             @RequestParam Status status
     ) {
@@ -91,7 +94,7 @@ public class ApplicationController {
                 .getAuthentication()
                 .getName();
 
-        return applicationService.updateStatus(email, id, status);
+        return ResponseEntity.ok(applicationService.updateStatus(email, id, status));
     }
 
     @Operation(
@@ -105,7 +108,7 @@ public class ApplicationController {
             @ApiResponse(responseCode = "404", description = "Job not found")
     })
     @GetMapping("/job/{jobId}")
-    public List<Application> getApplicationsByJob(
+    public ResponseEntity<List<ApplicationResponseDto>> getApplicationsByJob(
             @PathVariable Long jobId
     ) {
 
@@ -113,7 +116,7 @@ public class ApplicationController {
                 .getAuthentication()
                 .getName();
 
-        return applicationService.getApplicationsByJob(email, jobId);
+        return ResponseEntity.ok(applicationService.getApplicationsByJob(email, jobId));
     }
 
     @Operation(
@@ -126,12 +129,12 @@ public class ApplicationController {
             @ApiResponse(responseCode = "403", description = "Access denied")
     })
     @GetMapping
-    public List<Application> getAllApplications() {
+    public ResponseEntity<List<ApplicationResponseDto>> getAllApplications() {
 
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
 
-        return applicationService.getAllApplications(email);
+        return ResponseEntity.ok(applicationService.getAllApplications(email));
     }
 }

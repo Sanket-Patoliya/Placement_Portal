@@ -1,6 +1,7 @@
 package com.system.placementportal.Service;
 
 import com.system.placementportal.Dto.JobRequestDto;
+import com.system.placementportal.Dto.JobResponseDto;
 import com.system.placementportal.Entity.Job;
 import com.system.placementportal.Entity.Role;
 import com.system.placementportal.Entity.User;
@@ -24,7 +25,7 @@ public class JobService {
     private final UserRepository userRepository;
 
     // 🔹 Create Job
-    public Job createJob(String email, JobRequestDto dto) {
+    public JobResponseDto createJob(String email, JobRequestDto dto) {
         log.info("Admin {} creating a new job: {}", email, dto.getTitle());
 
         User user = userRepository.findByEmail(email)
@@ -45,21 +46,22 @@ public class JobService {
 
         Job savedJob = jobRepository.save(job);
         log.info("Job created successfully with ID: {}", savedJob.getId());
-        return savedJob;
+        return JobResponseDto.fromEntity(savedJob);
     }
     
     // 🔹 Get All Jobs (Paginated)
-    public Page<Job> getAllJobs(int page, int size, String sortBy) {
+    public Page<JobResponseDto> getAllJobs(int page, int size, String sortBy) {
         log.info("Fetching jobs - Page: {}, Size: {}, SortBy: {}", page, size, sortBy);
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
-        return jobRepository.findAll(pageable);
+        return jobRepository.findAll(pageable).map(JobResponseDto::fromEntity);
     }
 
     // 🔹 Get Job by ID
-    public Job getJobById(Long id) {
+    public JobResponseDto getJobById(Long id) {
         log.info("Fetching job details for ID: {}", id);
-        return jobRepository.findById(id)
+        Job job = jobRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found with ID: " + id));
+        return JobResponseDto.fromEntity(job);
     }
 
     // 🔹 Delete Job
@@ -73,7 +75,7 @@ public class JobService {
     }
 
     // 🔹 Update Job
-    public Job updateJob(String email, Long id, JobRequestDto dto) {
+    public JobResponseDto updateJob(String email, Long id, JobRequestDto dto) {
 
         log.info("Admin {} updating job ID: {}", email, id);
 
@@ -99,6 +101,6 @@ public class JobService {
 
         log.info("Job updated successfully with ID: {}", updatedJob.getId());
 
-        return updatedJob;
+        return JobResponseDto.fromEntity(updatedJob);
     }
 }

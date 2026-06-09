@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
 import java.util.Map;
 
@@ -34,8 +36,8 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Validation failed or user already exists")
     })
     @PostMapping("/register")
-    public String register(@RequestBody @Valid RegisterRequestDto request) {
-        return authService.register(request);
+    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDto request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
     // 🔹 LOGIN
@@ -49,7 +51,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Validation failed")
     })
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody @Valid LoginRequestDto request) {
-        return authService.login(request);
+    public ResponseEntity<Map<String, String>> login(@RequestBody @Valid LoginRequestDto request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }

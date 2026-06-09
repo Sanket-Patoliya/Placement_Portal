@@ -1,8 +1,11 @@
 package com.system.placementportal.Controller;
 
 import com.system.placementportal.Dto.JobRequestDto;
+import com.system.placementportal.Dto.JobResponseDto;
 import com.system.placementportal.Entity.Job;
 import com.system.placementportal.Service.JobService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -37,11 +40,11 @@ public class JobController {
             @ApiResponse(responseCode = "403", description = "Access denied")
     })
     @PostMapping
-    public Job createJob(@RequestBody @Valid JobRequestDto dto) {
+    public ResponseEntity<JobResponseDto> createJob(@RequestBody @Valid JobRequestDto dto) {
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
-        return jobService.createJob(email,dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(jobService.createJob(email,dto));
     }
 
     @Operation(
@@ -53,12 +56,12 @@ public class JobController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @GetMapping
-    public Page<Job> getAllJobs(
+    public ResponseEntity<Page<JobResponseDto>> getAllJobs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy) {
 
-        return jobService.getAllJobs(page, size, sortBy);
+        return ResponseEntity.ok(jobService.getAllJobs(page, size, sortBy));
     }
 
 
@@ -66,8 +69,8 @@ public class JobController {
             description = "Retrieve details of a specific job"
     )
     @GetMapping("/{id}")
-    public Job getJob(@PathVariable Long id) {
-        return jobService.getJobById(id);
+    public ResponseEntity<JobResponseDto> getJob(@PathVariable Long id) {
+        return ResponseEntity.ok(jobService.getJobById(id));
     }
 
 
@@ -84,9 +87,9 @@ public class JobController {
             @ApiResponse(responseCode = "404", description = "Job not found")
     })
     @DeleteMapping("/{id}")
-    public String deleteJob(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteJob(@PathVariable Long id) {
         jobService.deleteJob(id);
-        return "Job deleted";
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(
@@ -101,7 +104,7 @@ public class JobController {
             @ApiResponse(responseCode = "404", description = "Job not found")
     })
     @PutMapping("/{id}")
-    public Job updateJob(
+    public ResponseEntity<JobResponseDto> updateJob(
             @PathVariable Long id,
             @RequestBody @Valid JobRequestDto dto
     ) {
@@ -110,6 +113,6 @@ public class JobController {
                 .getAuthentication()
                 .getName();
 
-        return jobService.updateJob(email, id, dto);
+        return ResponseEntity.ok(jobService.updateJob(email, id, dto));
     }
 }

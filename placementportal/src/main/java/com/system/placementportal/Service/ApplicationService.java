@@ -1,5 +1,6 @@
 package com.system.placementportal.Service;
 
+import com.system.placementportal.Dto.ApplicationResponseDto;
 import com.system.placementportal.Entity.*;
 import com.system.placementportal.Exception.DuplicateResourceException;
 import com.system.placementportal.Exception.ResourceNotFoundException;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -56,7 +58,7 @@ public class ApplicationService {
     }
 
     // 🔹 GET MY APPLICATIONS (STUDENT)
-    public List<Application> getMyApplicationsByEmail(String email) {
+    public List<ApplicationResponseDto> getMyApplicationsByEmail(String email) {
         log.info("Fetching applications for student: {}", email);
 
         User user = userRepository.findByEmail(email)
@@ -66,10 +68,12 @@ public class ApplicationService {
             throw new RuntimeException("Only students can view applications");
         }
 
-        return applicationRepository.findByStudentUserId(user.getId());
+        return applicationRepository.findByStudentUserId(user.getId()).stream()
+                .map(ApplicationResponseDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
-    public List<Application> getApplicationsByJob(String email, Long jobId) {
+    public List<ApplicationResponseDto> getApplicationsByJob(String email, Long jobId) {
 
         log.info("Fetching applications for job ID: {}", jobId);
 
@@ -84,10 +88,12 @@ public class ApplicationService {
             throw new ResourceNotFoundException("Job not found");
         }
 
-        return applicationRepository.findByJobId(jobId);
+        return applicationRepository.findByJobId(jobId).stream()
+                .map(ApplicationResponseDto::fromEntity)
+                .collect(Collectors.toList());
     }
     // 🔹 UPDATE STATUS (ADMIN ONLY)
-    public Application updateStatus(String email, Long applicationId, Status status) {
+    public ApplicationResponseDto updateStatus(String email, Long applicationId, Status status) {
         log.info("Admin {} updating application ID {} to status {}", email, applicationId, status);
 
         User user = userRepository.findByEmail(email)
@@ -102,10 +108,10 @@ public class ApplicationService {
 
         application.setStatus(status);
 
-        return applicationRepository.save(application);
+        return ApplicationResponseDto.fromEntity(applicationRepository.save(application));
     }
 
-    public List<Application> getAllApplications(String email) {
+    public List<ApplicationResponseDto> getAllApplications(String email) {
 
         log.info("Fetching all applications");
 
@@ -116,6 +122,8 @@ public class ApplicationService {
             throw new RuntimeException("Access denied");
         }
 
-        return applicationRepository.findAll();
+        return applicationRepository.findAll().stream()
+                .map(ApplicationResponseDto::fromEntity)
+                .collect(Collectors.toList());
     }
 }

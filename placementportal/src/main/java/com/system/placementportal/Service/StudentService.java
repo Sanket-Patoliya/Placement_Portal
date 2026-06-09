@@ -2,6 +2,7 @@ package com.system.placementportal.Service;
 
 import com.system.placementportal.Dto.ChangePasswordRequestDto;
 import com.system.placementportal.Dto.StudentUpdateRequestDto;
+import com.system.placementportal.Dto.StudentResponseDto;
 import com.system.placementportal.Entity.Role;
 import com.system.placementportal.Entity.Student;
 import com.system.placementportal.Entity.User;
@@ -24,7 +25,7 @@ public class StudentService {
     private final ResumeService resumeService;
 
     // 🔹 GET PROFILE
-    public Student getMyProfileByEmail(String email) {
+    public StudentResponseDto getMyProfileByEmail(String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -34,12 +35,14 @@ public class StudentService {
             throw new RuntimeException("Only students can access profile");
         }
 
-        return studentRepository.findByUserId(user.getId())
+        Student student = studentRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        return StudentResponseDto.fromEntity(student);
     }
 
     // 🔹 UPDATE PROFILE (PATCH)
-    public Student updateProfileByEmail(String email, StudentUpdateRequestDto request) {
+    public StudentResponseDto updateProfileByEmail(String email, StudentUpdateRequestDto request) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -77,7 +80,7 @@ public class StudentService {
             student.setResumeUrl(request.getResumeUrl());
         }
 
-        return studentRepository.save(student);
+        return StudentResponseDto.fromEntity(studentRepository.save(student));
     }
 
     public String changePassword(

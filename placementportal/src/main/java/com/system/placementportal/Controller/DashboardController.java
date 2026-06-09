@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -32,7 +33,7 @@ public class DashboardController {
             @ApiResponse(responseCode = "403", description = "Access Denied")
     })
     @GetMapping("/stats")
-    public DashboardStatsDto getStats() {
-        return dashboardService.getStats();
+    public ResponseEntity<DashboardStatsDto> getStats() {
+        return ResponseEntity.ok(dashboardService.getStats());
     }
 }

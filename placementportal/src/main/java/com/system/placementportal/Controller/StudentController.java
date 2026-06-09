@@ -2,8 +2,10 @@ package com.system.placementportal.Controller;
 
 import com.system.placementportal.Dto.ChangePasswordRequestDto;
 import com.system.placementportal.Dto.StudentUpdateRequestDto;
+import com.system.placementportal.Dto.StudentResponseDto;
 import com.system.placementportal.Entity.Student;
 import com.system.placementportal.Service.StudentService;
+import org.springframework.http.ResponseEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,13 +41,13 @@ public class StudentController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @GetMapping("/me")
-    public Student getMyProfile() {
+    public ResponseEntity<StudentResponseDto> getMyProfile() {
 
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
 
-        return studentService.getMyProfileByEmail(email);
+        return ResponseEntity.ok(studentService.getMyProfileByEmail(email));
     }
 
     // 🔹 UPDATE PROFILE (PATCH)
@@ -59,13 +61,13 @@ public class StudentController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @PatchMapping("/profile")
-    public Student updateProfile(@RequestBody StudentUpdateRequestDto request) {
+    public ResponseEntity<StudentResponseDto> updateProfile(@RequestBody StudentUpdateRequestDto request) {
 
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
 
-        return studentService.updateProfileByEmail(email, request);
+        return ResponseEntity.ok(studentService.updateProfileByEmail(email, request));
     }
 
     @Operation(
@@ -78,7 +80,7 @@ public class StudentController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @PatchMapping("/change-password")
-    public String changePassword(
+    public ResponseEntity<String> changePassword(
             @RequestBody @Valid ChangePasswordRequestDto request
     ) {
 
@@ -86,21 +88,21 @@ public class StudentController {
                 .getAuthentication()
                 .getName();
 
-        return studentService.changePassword(email, request);
+        return ResponseEntity.ok(studentService.changePassword(email, request));
     }
 
     @PostMapping(
             value = "/resume",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
-    public String uploadResume(
+    public ResponseEntity<String> uploadResume(
             @Parameter(description = "Resume PDF file")
             @RequestParam("file") MultipartFile file
     ) {
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
+          String email = SecurityContextHolder.getContext()
+                  .getAuthentication()
+                  .getName();
 
-        return studentService.uploadResume(email, file);
+          return ResponseEntity.ok(studentService.uploadResume(email, file));
     }
 }
